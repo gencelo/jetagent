@@ -1,14 +1,17 @@
 package com.oguzhan.jetagent.service;
 
 import com.oguzhan.jetagent.model.Post;
+import com.oguzhan.jetagent.repository.PostRepository;
 import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +22,36 @@ public class IndexService {
 
 	private static final String URL = "https://www.emlakjet.com/satilik-konut";
 
-	public void indexPosts(){
-		final List<Post> posts = crawlPostFromUrl();
+	private final PostRepository postRepository;
 
-
+	@Autowired
+	public IndexService(PostRepository postRepository) {
+		this.postRepository = postRepository;
 	}
 
+	/**
+	 * This method delete all data in elastic cluster afred index all post that generated from
+	 * {@link #crawlPostFromUrl() crawlPostFromUrl} to the elastic
+	 */
+	@PostConstruct
+	public void indexPosts() {
+
+		final List<Post> posts = crawlPostFromUrl();
+
+		postRepository.deleteAll();
+
+		log.info("All data deleted from elastic");
+
+		for (Post post : posts) {
+			postRepository.save(post);
+		}
+
+		log.info("New data indexed to elastic");
+	}
+
+	/**
+	 * @return a post list that generated from emlakjet web site using jsoup.
+	 */
 	private List<Post> crawlPostFromUrl() {
 
 		List<Post> posts = new ArrayList<>();
@@ -33,16 +60,19 @@ public class IndexService {
 			Document document = Jsoup.connect(URL).get();
 			Elements elements = document.select(".row-listing-item");
 
-			for (Element element : elements) {
+			for (Element element : elements.subList(0, Math.min(30, elements.size()))) {
+
+				final String priceWithCurrency = element.select(".price").text();
 
 				//@formatter:off
 				Post post = Post.builder()
 						.id(getId(element))
 						.title(element.select(".title").text())
 						.roomCount(element.select(".room-count").text())
-						.squareMeter(element.select(".square-meter").text())
+						.squareMeter(getSquareMeter(element.select(".square-meter").text()))
 						.location(element.select(".location").text())
-						.price(element.select(".price").text())
+						.price(getPrice(priceWithCurrency))
+						.currency(getCurrency(priceWithCurrency))
 						.coverPhotoAddress(getCoverPhotoUrl(element))
 						.date(element.select(".date").text())
 						.floor(getFloor(element))
@@ -109,6 +139,31 @@ public class IndexService {
 			return id.substring(id.lastIndexOf("_") + 1);
 		}
 
-		return "";
+		return String.valueOf(element.hashCode());
+	}
+
+	private Long getPrice(String priceWithCurrency) {
+
+		if (priceWithCurrency == null)
+			return 0L;
+
+		return Long.parseLong(priceWithCurrency.replaceAll("\\D+", ""));
+	}
+
+	private String getCurrency(String priceWithCurrency) {
+
+		if (priceWithCurrency == null)
+			return "Fiyat Sorun";
+
+		return priceWithCurrency.replaceAll("[^A-Za-z]+", "");
+	}
+
+	private Integer getSquareMeter(String squareMeterText) {
+
+		if (squareMeterText == null)
+			return 0;
+
+		return Integer.parseInt(squareMeterText.replaceAll(" m2", ""));
+
 	}
 }
