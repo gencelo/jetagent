@@ -11,3 +11,19 @@ services:
     container_name: jetagent_elasticsearch
     environment:
     - discovery.type=single-node
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:9200"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+   
+   backend:
+    image: jetagent 
+    ports:
+    - "8080:8080"
+    container_name: jetagent_backend
+    depends_on:
+    - elasticsearch
+    links:
+    - elasticsearch
+    
