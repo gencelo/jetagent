@@ -30,7 +30,8 @@ public class LookupService {
 
 	public Aggregation getRoomCounts() {
 
-		SearchQuery searchQuery = new NativeSearchQueryBuilder().withIndices(INDEX).addAggregation(AggregationBuilders.count("roomCount").field("roomCount")).build();
+		SearchQuery searchQuery = new NativeSearchQueryBuilder().withIndices(INDEX).addAggregation(
+				AggregationBuilders.count("roomCount").field("roomCount")).build();
 
 		Aggregations aggregations = elasticsearchTemplate.query(searchQuery, new ResultsExtractor<Aggregations>() {
 			@Override

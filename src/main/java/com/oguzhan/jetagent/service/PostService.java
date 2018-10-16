@@ -37,7 +37,8 @@ public class PostService {
 		return postRepository.findAll();
 	}
 
-	public List<Post> searchAllField(String searchText, Long maxPrice, Long minPrice, Integer minSquareMeter, Integer maxSquareMeter, List<String> roomCounts) {
+	public List<Post> searchAllField(String searchText, Long maxPrice, Long minPrice, Integer minSquareMeter, Integer maxSquareMeter,
+			List<String> roomCounts) {
 
 		//@formatter:off
 		NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
@@ -69,7 +70,7 @@ public class PostService {
 			//@formatter:on
 		}
 
-		if(roomCounts != null && roomCounts.size()>0){
+		if (roomCounts != null && roomCounts.size() > 0) {
 
 			roomCounts.forEach(roomCount -> queryBuilder.should(queryStringQuery(roomCount).field("roomCount.keyword")));
 		}

@@ -91,37 +91,42 @@ public class IndexService {
 	private String getFloor(Element element) {
 
 		final Elements properties = element.select(".properties");
-
 		if (properties.size() > 0) {
 
 			for (Element property : properties.get(0).children()) {
+
 				final Elements elementsByAttribute = property.getElementsByAttribute("id-listing-apartment-floor");
 
 				if (elementsByAttribute.size() > 0) {
+
 					return elementsByAttribute.get(0).text();
 				}
 			}
 		}
 
 		return "";
-
 	}
 
 	private String getCoverPhotoUrl(Element element) {
 
 		final Element coverImageElement = element.select(".cover-image").get(0);
 		final String coverPhotoChild = coverImageElement.attr("style");
+
 		if (!StringUtil.isNullOrEmpty(coverPhotoChild)) {
+
 			try {
+
 				return coverPhotoChild.substring(coverPhotoChild.indexOf("//"), coverPhotoChild.indexOf("')"));
 			}
 			catch (IndexOutOfBoundsException e) {
+
 				log.error(e.getMessage(), e);
 				return "";
 			}
 		}
 		else {
 			final String coverPhotoUrlLazyLoad = coverImageElement.attr("lazy-load");
+
 			if (!StringUtil.isNullOrEmpty(coverPhotoUrlLazyLoad)) {
 				return coverPhotoUrlLazyLoad;
 			}
@@ -152,18 +157,20 @@ public class IndexService {
 
 	private String getCurrency(String priceWithCurrency) {
 
-		if (priceWithCurrency == null)
+		if (priceWithCurrency == null) {
 			return "Fiyat Sorun";
+		}
 
 		return priceWithCurrency.replaceAll("[^A-Za-z]+", "");
 	}
 
 	private Integer getSquareMeter(String squareMeterText) {
 
-		if (squareMeterText == null)
+		if (squareMeterText == null) {
 			return 0;
+		}
 
 		return Integer.parseInt(squareMeterText.replaceAll(" m2", ""));
-
 	}
+
 }
