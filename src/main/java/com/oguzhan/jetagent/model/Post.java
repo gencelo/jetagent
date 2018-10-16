@@ -26,6 +26,7 @@ public class Post {
 
 	private String currency;
 
+	@Field(fielddata = true)
 	private String roomCount;
 
 	@Field(type = FieldType.Integer)
