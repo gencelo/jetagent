@@ -1,3 +1,6 @@
+
+NOT: If you can not run on your local computer, you can be check from this from http://142.93.167.105:3000/ 
+
 # jetagent
 This repository created for 'EmlakJet hiring challenge'
 
