@@ -3,18 +3,17 @@ This repository created for 'EmlakJet hiring challenge'
 
 ## for Elastic search
 
-docker pull docker.elastic.co/elasticsearch/elasticsearch:6.4.2
 docker-compose up (-d is optional for background starting)
 
 ## for JAVA project 
 
-mvn clean package
-cd target
-java -jar [jar-name].jar
+- mvn clean package
+- cd target
+- java -jar [jar-name].jar
 
 or direct run
 
-java -jar jetagent-0.0.1-SNAPSHOT.jar
+- java -jar jetagent-0.0.1-SNAPSHOT.jar
 
 NOT: JAVA project need running elasticSearch cluster when starting.
 
